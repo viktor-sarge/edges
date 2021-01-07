@@ -5,6 +5,10 @@ const canvas = document.getElementById('myCanvas');
 console.log(canvas);
 const ctx = canvas.getContext('2d');
 console.log(ctx);
+const width = window.innerWidth;
+const height = window.innerHeight;
+ctx.canvas.width = width;
+ctx.canvas.height = height;
 
 const randomInt = function (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
@@ -43,7 +47,7 @@ const distance = function ([x1, y1], [x2, y2]) {
 	return Math.sqrt(a * a + b * b);
 };
 
-const pointsArr = getPoints(80, 1200, 800);
+const pointsArr = getPoints(80, width, height);
 console.log(pointsArr);
 pointsArr.forEach((current) => paintCircleAt(...current, randomInt(2, 5)));
 
