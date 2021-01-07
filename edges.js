@@ -1,10 +1,7 @@
 'use strict';
 
-console.log('Loaded the js');
 const canvas = document.getElementById('myCanvas');
-console.log(canvas);
 const ctx = canvas.getContext('2d');
-console.log(ctx);
 const width = window.innerWidth;
 const height = window.innerHeight;
 ctx.canvas.width = width;
@@ -28,7 +25,6 @@ const getPoints = function (nr, maxX, maxY) {
 		const velY = randomVelocity();
 		coordinates.push([x, y, velX, velY]);
 	}
-	console.log(coordinates);
 	return coordinates;
 };
 
@@ -54,7 +50,6 @@ const distance = function ([x1, y1], [x2, y2]) {
 };
 
 const pointsArr = getPoints(80, width, height);
-console.log(pointsArr);
 pointsArr.forEach((current) => paintCircleAt(...current, randomInt(2, 5)));
 
 pointsArr.forEach((current, i, arr) => {
