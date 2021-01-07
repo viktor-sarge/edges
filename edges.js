@@ -47,6 +47,7 @@ const drawLine = function ([x1, y1], [x2, y2]) {
 	ctx.stroke();
 };
 
+// Mesure distance between two points
 const distance = function ([x1, y1], [x2, y2]) {
 	const a = x1 - x2;
 	const b = y1 - y2;
@@ -69,27 +70,32 @@ pointsArr.forEach((current, i, arr) => {
 const step = function () {
 	// Update coordinates of all points
 	pointsArr.forEach((current) => {
-		const newPos = current; // [x,y,velX,velY]
+		console.log(current);
+		let [x, y, velX, velY] = current;
 		// Update the X position
-		if (newPos[0] < 2) {
-			newPos[0] = 3; // Teleport within bounds
-			newPos[2] *= -1; // Invert velocity
-		} else if (newPos[0] > width - 2) {
-			newPos[0] -= 3; // Teleport within bounds
-			newPos[2] *= -1; // Invert velocity
+		if (x < 2) {
+			x = 3; // Teleport within bounds
+			velX *= -1; // Invert velocity
+		} else if (x > width - 2) {
+			x -= 3; // Teleport within bounds
+			velX *= -1; // Invert velocity
 		} else {
-			newPos[0] += newPos[2];
+			x += velX;
 		}
 		// Update the Y positions
-		if (newPos[1] < 2) {
-			newPos[1] = 3; // Teleport within bounds
-			newPos[3] *= -1; // Invert velocity
-		} else if (newPos[1] > height - 2) {
-			newPos[1] -= 3; // Teleport within bounds
-			newPos[3] *= -1; // Invert velocity
+		if (y < 2) {
+			y = 3; // Teleport within bounds
+			velY *= -1; // Invert velocity
+		} else if (y > height - 2) {
+			y -= 3; // Teleport within bounds
+			velY *= -1; // Invert velocity
 		} else {
-			newPos[1] += newPos[3];
+			y += velY;
 		}
+		current[0] = x;
+		current[1] = y;
+		current[2] = velX;
+		current[3] = velY;
 	});
 
 	// Clear canvas and repaint everything
