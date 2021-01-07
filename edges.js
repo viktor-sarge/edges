@@ -4,6 +4,9 @@ const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 const width = window.innerWidth;
 const height = window.innerHeight;
+const maxConnectionLength = 150;
+const numberOfPoints = 200;
+const decelerator = 8;
 ctx.canvas.width = width;
 ctx.canvas.height = height;
 
@@ -12,7 +15,8 @@ const randomInt = function (min, max) {
 };
 
 const randomVelocity = function () {
-	let num = (Math.random() / 4) * (Math.round(Math.random()) ? 1 : -1);
+	let num =
+		(Math.random() / decelerator) * (Math.round(Math.random()) ? 1 : -1);
 	return num;
 };
 
@@ -49,12 +53,15 @@ const distance = function ([x1, y1], [x2, y2]) {
 	return Math.sqrt(a * a + b * b);
 };
 
-const pointsArr = getPoints(80, width, height);
-pointsArr.forEach((current) => paintCircleAt(...current, randomInt(2, 5)));
+// Create array with coordinates for all points
+const pointsArr = getPoints(numberOfPoints, width, height);
 
+// Draw initial frame
+pointsArr.forEach((current) => paintCircleAt(...current, randomInt(2, 5)));
 pointsArr.forEach((current, i, arr) => {
 	for (let i = 0; i < arr.length; i++) {
-		if (distance(current, arr[i]) < 200) drawLine(current, arr[i]);
+		if (distance(current, arr[i]) < maxConnectionLength)
+			drawLine(current, arr[i]);
 	}
 });
 
@@ -87,10 +94,11 @@ const step = function () {
 
 	// Clear canvas and repaint everything
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	pointsArr.forEach((current) => paintCircleAt(...current, 5));
+	pointsArr.forEach((current) => paintCircleAt(...current, 3));
 	pointsArr.forEach((current, i, arr) => {
 		for (let i = 0; i < arr.length; i++) {
-			if (distance(current, arr[i]) < 200) drawLine(current, arr[i]);
+			if (distance(current, arr[i]) < maxConnectionLength)
+				drawLine(current, arr[i]);
 		}
 	});
 	window.requestAnimationFrame(step);
