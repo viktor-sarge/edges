@@ -14,18 +14,25 @@ const randomInt = function (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 };
 
+const randomVelocity = function () {
+	let num = (Math.random() / 4) * (Math.round(Math.random()) ? 1 : -1);
+	return num;
+};
+
 const getPoints = function (nr, maxX, maxY) {
 	const coordinates = [];
 	for (let i = 0; i < nr; i++) {
 		const x = randomInt(0, maxX);
 		const y = randomInt(0, maxY);
-		coordinates.push([x, y]);
+		const velX = randomVelocity();
+		const velY = randomVelocity();
+		coordinates.push([x, y, velX, velY]);
 	}
 	console.log(coordinates);
 	return coordinates;
 };
 
-const paintCircleAt = function (x, y, size) {
+const paintCircleAt = function (x, y, velX, velY, size) {
 	ctx.beginPath();
 	ctx.arc(x, y, size, 0, 2 * Math.PI);
 	ctx.fillStyle = 'black';
@@ -38,7 +45,6 @@ const drawLine = function ([x1, y1], [x2, y2]) {
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
 	ctx.stroke();
-	//console.log(x1, y1, x2, y2);
 };
 
 const distance = function ([x1, y1], [x2, y2]) {
@@ -56,3 +62,44 @@ pointsArr.forEach((current, i, arr) => {
 		if (distance(current, arr[i]) < 200) drawLine(current, arr[i]);
 	}
 });
+
+// Animation loop
+const step = function () {
+	// Update coordinates of all points
+	pointsArr.forEach((current) => {
+		const newPos = current; // [x,y,velX,velY]
+		// Update the X position
+		if (newPos[0] < 2) {
+			newPos[0] = 3; // Teleport within bounds
+			newPos[2] *= -1; // Invert velocity
+		} else if (newPos[0] > width - 2) {
+			newPos[0] -= 3; // Teleport within bounds
+			newPos[2] *= -1; // Invert velocity
+		} else {
+			newPos[0] += newPos[2];
+		}
+		// Update the Y positions
+		if (newPos[1] < 2) {
+			newPos[1] = 3; // Teleport within bounds
+			newPos[3] *= -1; // Invert velocity
+		} else if (newPos[1] > height - 2) {
+			newPos[1] -= 3; // Teleport within bounds
+			newPos[3] *= -1; // Invert velocity
+		} else {
+			newPos[1] += newPos[3];
+		}
+	});
+
+	// Clear canvas and repaint everything
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	pointsArr.forEach((current) => paintCircleAt(...current, 5));
+	pointsArr.forEach((current, i, arr) => {
+		for (let i = 0; i < arr.length; i++) {
+			if (distance(current, arr[i]) < 200) drawLine(current, arr[i]);
+		}
+	});
+	window.requestAnimationFrame(step);
+};
+
+// Start animation
+window.requestAnimationFrame(step);
