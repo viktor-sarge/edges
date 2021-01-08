@@ -4,8 +4,8 @@ const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 const width = window.innerWidth;
 const height = window.innerHeight;
-const maxConnectionLength = 150;
-const numberOfPoints = 200;
+const maxConnectionLength = 200;
+const numberOfPoints = 100;
 const decelerator = 8;
 ctx.canvas.width = width;
 ctx.canvas.height = height;
@@ -35,7 +35,7 @@ const getPoints = function (nr, maxX, maxY) {
 const paintCircleAt = function (x, y, velX, velY, size) {
 	ctx.beginPath();
 	ctx.arc(x, y, size, 0, 2 * Math.PI);
-	ctx.fillStyle = 'black';
+	ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
 	ctx.fill();
 	ctx.stroke();
 };
@@ -44,6 +44,7 @@ const drawLine = function ([x1, y1], [x2, y2]) {
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
+	ctx.strokeStyle = 'rgba(0, 0, 0, 0.12)';
 	ctx.stroke();
 };
 
@@ -70,7 +71,6 @@ pointsArr.forEach((current, i, arr) => {
 const step = function () {
 	// Update coordinates of all points
 	pointsArr.forEach((current) => {
-		console.log(current);
 		let [x, y, velX, velY] = current;
 		// Update the X position
 		if (x < 2) {
@@ -100,7 +100,7 @@ const step = function () {
 
 	// Clear canvas and repaint everything
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	pointsArr.forEach((current) => paintCircleAt(...current, 3));
+	pointsArr.forEach((current) => paintCircleAt(...current, 2));
 	pointsArr.forEach((current, i, arr) => {
 		for (let i = 0; i < arr.length; i++) {
 			if (distance(current, arr[i]) < maxConnectionLength)
