@@ -2,13 +2,33 @@
 
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
+const maxConnectionLength = 200;
+const decelerator = 8;
 let width = window.innerWidth;
 let height = window.innerHeight;
-const totalPixels = width * height;
-const maxConnectionLength = 200;
-let numberOfPoints = totalPixels / 10000;
-const decelerator = 2;
+let totalPixels = width * height;
+let numberOfPoints = totalPixels / 8000;	
 let pointsArr = [];
+let mouseX = 0;
+let mouseY = 0;
+const perfectFrameTime = 1000 / 60;
+let deltaTime = 0;
+let lastTimestamp = 0;
+let spawnProtection = 0;
+
+// Mouse handling
+let primaryMouseButtonDown = false;
+function setPrimaryButtonState(e) {
+    var flags = e.buttons !== undefined ? e.buttons : e.which;
+    primaryMouseButtonDown = (flags & 1) === 1;
+}
+document.addEventListener("mousedown", setPrimaryButtonState);
+document.addEventListener("mouseup", setPrimaryButtonState);
+document.addEventListener('mousemove', (e) => {
+    setPrimaryButtonState(e);
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+});
 
 // --------------------------------------------------
 // Points class
@@ -19,6 +39,7 @@ class point {
 		this.y = y;
 		this.velX = randomVelocity();
 		this.velY = randomVelocity();
+		this.radius = 3;
 	}
 	update() {
 		if (this.x < 2) {
@@ -42,7 +63,7 @@ class point {
 		}
 	}
 	draw() {
-		paintCircleAt(this.x, this.y, this.velX, this.velY, 2);
+		paintCircleAt(this.x, this.y, this.radius);
 	}
 }
 
@@ -69,7 +90,7 @@ const getPoints = function (nr, maxX, maxY) {
 	return points;
 };
 
-const paintCircleAt = function (x, y, velX, velY, size) {
+const paintCircleAt = function (x, y, size) {
 	ctx.beginPath();
 	ctx.arc(x, y, size, 0, 2 * Math.PI);
 	ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
@@ -77,7 +98,7 @@ const paintCircleAt = function (x, y, velX, velY, size) {
 	ctx.stroke();
 };
 
-const drawLine = function ([x1, y1], [x2, y2]) {
+const drawLine = function (x1, y1, x2, y2) {
 	ctx.beginPath();
 	ctx.moveTo(x1, y1);
 	ctx.lineTo(x2, y2);
@@ -86,7 +107,7 @@ const drawLine = function ([x1, y1], [x2, y2]) {
 };
 
 // Mesure distance between two points
-const distance = function ([x1, y1], [x2, y2]) {
+const distance = function (x1, y1, x2, y2) {
 	const a = x1 - x2;
 	const b = y1 - y2;
 	return Math.sqrt(a * a + b * b);
@@ -99,17 +120,30 @@ function fitCanvasToViewport () {
 	canvas.width = width;
 	canvas.height = height;
 	pointsArr = getPoints(numberOfPoints, width, height);
-	console.log("Resized to: " + width + "x" + height);
 };
 fitCanvasToViewport();
 window.addEventListener('resize', fitCanvasToViewport);
 
 // Animation loop
-const step = function () {
+const step = function (timestamp) {
+	deltaTime = (timestamp - lastTimestamp) / perfectFrameTime;
+	lastTimestamp = timestamp;
+	spawnProtection += deltaTime;
 	// Update coordinates of all points
 	pointsArr.forEach((current) => {
 		current.update();
 	});
+
+	if(primaryMouseButtonDown) {
+		// Check if mouse is within canvas
+		if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height && spawnProtection > 3) {
+			spawnProtection = 0;
+			// Span a new point at mouse position
+			pointsArr.shift();
+			pointsArr.push(new point(mouseX, mouseY));
+		}
+
+	}
 
 	// Clear canvas and repaint everything
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -118,8 +152,8 @@ const step = function () {
 	// Calculate and draw connecting lines
 	pointsArr.forEach((current, i, arr) => {
 		for (let i = 0; i < arr.length; i++) {
-			if (distance([current.x, current.y], [arr[i].x, arr[i].y]) < maxConnectionLength)
-				drawLine([current.x, current.y], [arr[i].x, arr[i].y]);
+			if (distance(current.x, current.y, arr[i].x, arr[i].y) < maxConnectionLength)
+				drawLine(current.x, current.y, arr[i].x, arr[i].y);
 		}
 	});
 	window.requestAnimationFrame(step);
