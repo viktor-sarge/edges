@@ -7,7 +7,7 @@ const decelerator = 8;
 let width = window.innerWidth;
 let height = window.innerHeight;
 let totalPixels = width * height;
-let numberOfPoints = totalPixels / 8000;	
+let numberOfPoints = totalPixels / 10000;	
 let pointsArr = [];
 let mouseX = 0;
 let mouseY = 0;
@@ -15,6 +15,7 @@ const perfectFrameTime = 1000 / 60;
 let deltaTime = 0;
 let lastTimestamp = 0;
 let spawnProtection = 0;
+let touching = false;
 
 // Mouse handling
 let primaryMouseButtonDown = false;
@@ -30,6 +31,26 @@ document.addEventListener('mousemove', (e) => {
     mouseY = e.clientY;
 });
 
+// Touch handling
+document.addEventListener("touchstart", touchHandler);
+document.addEventListener("touchmove", touchHandler);
+document.addEventListener("touchend", touchstop);
+
+function touchstop() {
+	touching = false;
+}
+
+// Touch handler function
+function touchHandler(e) {
+	if (e.touches.length == 1) {
+		e.preventDefault();
+		mouseX = e.touches[0].clientX;
+		mouseY = e.touches[0].clientY;
+		touching = true;
+	}
+}
+
+
 // --------------------------------------------------
 // Points class
 // --------------------------------------------------
@@ -39,7 +60,7 @@ class point {
 		this.y = y;
 		this.velX = randomVelocity();
 		this.velY = randomVelocity();
-		this.radius = 3;
+		this.radius = 2;
 	}
 	update() {
 		if (this.x < 2) {
@@ -134,7 +155,7 @@ const step = function (timestamp) {
 		current.update();
 	});
 
-	if(primaryMouseButtonDown) {
+	if(primaryMouseButtonDown || touching) {
 		// Check if mouse is within canvas
 		if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height && spawnProtection > 3) {
 			spawnProtection = 0;
@@ -142,7 +163,6 @@ const step = function (timestamp) {
 			pointsArr.shift();
 			pointsArr.push(new point(mouseX, mouseY));
 		}
-
 	}
 
 	// Clear canvas and repaint everything
