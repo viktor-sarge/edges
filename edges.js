@@ -2,15 +2,53 @@
 
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
-const width = window.innerWidth;
-const height = window.innerHeight;
+let width = window.innerWidth;
+let height = window.innerHeight;
 const totalPixels = width * height;
 const maxConnectionLength = 200;
-const numberOfPoints = totalPixels / 10000;
-const decelerator = 8;
-ctx.canvas.width = width;
-ctx.canvas.height = height;
+let numberOfPoints = totalPixels / 10000;
+const decelerator = 2;
+let pointsArr = [];
 
+// --------------------------------------------------
+// Points class
+// --------------------------------------------------
+class point {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+		this.velX = randomVelocity();
+		this.velY = randomVelocity();
+	}
+	update() {
+		if (this.x < 2) {
+			this.x = 3; // Teleport within bounds
+			this.velX *= -1; // Invert velocity
+		} else if (this.x > width - 2) {
+			this.x -= 3; // Teleport within bounds
+			this.velX *= -1; // Invert velocity
+		} else {
+			this.x += this.velX;
+		}
+		// Update the Y positions
+		if (this.y < 2) {
+			this.y = 3; // Teleport within bounds
+			this.velY *= -1; // Invert velocity
+		} else if (this.y > height - 2) {
+			this.y -= 3; // Teleport within bounds
+			this.velY *= -1; // Invert velocity
+		} else {
+			this.y += this.velY;
+		}
+	}
+	draw() {
+		paintCircleAt(this.x, this.y, this.velX, this.velY, 2);
+	}
+}
+
+// --------------------------------------------------
+// Helper functions
+// --------------------------------------------------
 const randomInt = function (min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 };
@@ -22,15 +60,13 @@ const randomVelocity = function () {
 };
 
 const getPoints = function (nr, maxX, maxY) {
-	const coordinates = [];
+	const points = [];
 	for (let i = 0; i < nr; i++) {
 		const x = randomInt(0, maxX);
 		const y = randomInt(0, maxY);
-		const velX = randomVelocity();
-		const velY = randomVelocity();
-		coordinates.push([x, y, velX, velY]);
+		points.push(new point(x, y));
 	}
-	return coordinates;
+	return points;
 };
 
 const paintCircleAt = function (x, y, velX, velY, size) {
@@ -56,56 +92,34 @@ const distance = function ([x1, y1], [x2, y2]) {
 	return Math.sqrt(a * a + b * b);
 };
 
-// Create array with coordinates for all points
-const pointsArr = getPoints(numberOfPoints, width, height);
-
-// Draw initial frame
-pointsArr.forEach((current) => paintCircleAt(...current, randomInt(2, 5)));
-pointsArr.forEach((current, i, arr) => {
-	for (let i = 0; i < arr.length; i++) {
-		if (distance(current, arr[i]) < maxConnectionLength)
-			drawLine(current, arr[i]);
-	}
-});
+// Make sure canvas is the same size as the viewport
+function fitCanvasToViewport () { 
+	width = window.innerWidth;
+	height = window.innerHeight;
+	canvas.width = width;
+	canvas.height = height;
+	pointsArr = getPoints(numberOfPoints, width, height);
+	console.log("Resized to: " + width + "x" + height);
+};
+fitCanvasToViewport();
+window.addEventListener('resize', fitCanvasToViewport);
 
 // Animation loop
 const step = function () {
 	// Update coordinates of all points
 	pointsArr.forEach((current) => {
-		let [x, y, velX, velY] = current;
-		// Update the X position
-		if (x < 2) {
-			x = 3; // Teleport within bounds
-			velX *= -1; // Invert velocity
-		} else if (x > width - 2) {
-			x -= 3; // Teleport within bounds
-			velX *= -1; // Invert velocity
-		} else {
-			x += velX;
-		}
-		// Update the Y positions
-		if (y < 2) {
-			y = 3; // Teleport within bounds
-			velY *= -1; // Invert velocity
-		} else if (y > height - 2) {
-			y -= 3; // Teleport within bounds
-			velY *= -1; // Invert velocity
-		} else {
-			y += velY;
-		}
-		current[0] = x;
-		current[1] = y;
-		current[2] = velX;
-		current[3] = velY;
+		current.update();
 	});
 
 	// Clear canvas and repaint everything
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	pointsArr.forEach((current) => paintCircleAt(...current, 2));
+	pointsArr.forEach((current) => current.draw());
+
+	// Calculate and draw connecting lines
 	pointsArr.forEach((current, i, arr) => {
 		for (let i = 0; i < arr.length; i++) {
-			if (distance(current, arr[i]) < maxConnectionLength)
-				drawLine(current, arr[i]);
+			if (distance([current.x, current.y], [arr[i].x, arr[i].y]) < maxConnectionLength)
+				drawLine([current.x, current.y], [arr[i].x, arr[i].y]);
 		}
 	});
 	window.requestAnimationFrame(step);
