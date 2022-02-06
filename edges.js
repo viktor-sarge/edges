@@ -7,7 +7,7 @@ const decelerator = 8;
 let width = window.innerWidth;
 let height = window.innerHeight;
 let totalPixels = width * height;
-let numberOfPoints = totalPixels / 10000;	
+let numberOfPoints = totalPixels / 10000;
 let pointsArr = [];
 let mouseX = 0;
 let mouseY = 0;
@@ -16,6 +16,10 @@ let deltaTime = 0;
 let lastTimestamp = 0;
 let spawnProtection = 0;
 let touching = false;
+
+// --------------------------------------------------
+// Input handnling
+// --------------------------------------------------
 
 // Mouse handling
 let primaryMouseButtonDown = false;
@@ -49,7 +53,6 @@ function touchHandler(e) {
 		touching = true;
 	}
 }
-
 
 // --------------------------------------------------
 // Points class
@@ -140,6 +143,8 @@ function fitCanvasToViewport () {
 	height = window.innerHeight;
 	canvas.width = width;
 	canvas.height = height;
+	totalPixels = width * height;
+	numberOfPoints = totalPixels / 10000;
 	pointsArr = getPoints(numberOfPoints, width, height);
 };
 fitCanvasToViewport();
