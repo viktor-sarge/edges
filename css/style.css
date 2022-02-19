@@ -1,0 +1,46 @@
+.appcontainer {
+    position: relative;
+}
+
+.panel {
+    width: 20rem;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+}
+
+.control {
+    padding-top:1rem;
+    padding-bottom:1rem;
+}
+.panelcontent {
+    margin-top:1.5rem;
+    display: flex;
+    align-items: center;
+    justify-items: center;
+    flex-direction: column;
+    background: rgb(235, 231, 231);
+    border: 1px solid #ccc;
+    padding-bottom: 1.5rem;
+    padding-top: 1.5rem;
+}
+
+.hidden {
+    display: none;
+}
+
+#myCanvas {
+    position: absolute;
+    z-index: 1;
+}
+
+@font-face {
+    font-family: "Noto Sans";
+    src:url("/fonts/NotoSansRegular.ttf");
+}
+
+label {
+    font-family: "Noto Sans";
+}

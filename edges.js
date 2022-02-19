@@ -3,11 +3,12 @@
 const canvas = document.getElementById('myCanvas');
 const ctx = canvas.getContext('2d');
 const maxConnectionLength = 200;
-const decelerator = 8;
+let decelerator = 8;
 let width = window.innerWidth;
 let height = window.innerHeight;
 let totalPixels = width * height;
-let numberOfPoints = totalPixels / 10000;
+let densityDivider = 10000;
+let numberOfPoints = totalPixels / densityDivider;
 let pointsArr = [];
 let mouseX = 0;
 let mouseY = 0;
@@ -20,6 +21,28 @@ let touching = false;
 // --------------------------------------------------
 // Input handnling
 // --------------------------------------------------
+
+let speedslider = document.getElementById('speedslider');
+speedslider.oninput = function() {
+	decelerator = this.value;
+	pointsArr = getPoints(numberOfPoints, width, height);
+}
+
+let densityslider = document.getElementById('densityslider');
+densityslider.oninput = function() {
+	setDensity(this.value);
+}
+
+function toggleMenu() {
+	document.getElementById('panelcontent').classList.toggle('hidden');
+	document.getElementById('panelcontent').classList.toggle('panelcontent');
+}
+
+function setDensity(input) {
+	densityDivider = input;
+	numberOfPoints = totalPixels / densityDivider;
+	pointsArr = getPoints(numberOfPoints, width, height);
+}
 
 // Mouse handling
 let primaryMouseButtonDown = false;
@@ -144,7 +167,7 @@ function fitCanvasToViewport () {
 	canvas.width = width;
 	canvas.height = height;
 	totalPixels = width * height;
-	numberOfPoints = totalPixels / 10000;
+	numberOfPoints = totalPixels / densityDivider;
 	pointsArr = getPoints(numberOfPoints, width, height);
 };
 fitCanvasToViewport();
